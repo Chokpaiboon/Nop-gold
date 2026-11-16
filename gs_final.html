@@ -1,0 +1,363 @@
+<style>@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap');
+:root{--bg:#04080b;--card:#0a1217;--line:#1d2b33;--g:#1ff2a0;--g2:#0fb877;--tx:#e9f3ef;--mut:#8aa097}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;line-height:1.5}
+a{color:inherit;text-decoration:none}
+.green{color:var(--g);text-shadow:0 0 22px rgba(31,242,160,.45)}
+.page{display:none}.page.act{display:block;animation:pgin .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes pgin{from{opacity:0;transform:translateY(24px)}}
+.page.sub{min-height:70vh;padding-top:70px}
+.links a.cur{color:var(--g)}.menu a.cur{color:var(--g);background:#0b1f19}
+.logo{display:inline}
+.shared{padding-top:20px}
+nav{position:fixed;top:0;left:0;right:0;height:60px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:linear-gradient(#04080bf2,#04080bb0);backdrop-filter:blur(10px);border-bottom:1px solid #12201f}
+.logo{font-weight:800;font-size:20px;letter-spacing:1px}.logo b{color:var(--g)}
+.logo small{font-weight:400;font-size:11px;color:var(--mut);margin-left:8px;letter-spacing:2px}
+.links{display:flex;gap:26px;font-size:14px;color:var(--mut)}
+.links a:hover{color:var(--g)}
+.burger{display:none;width:40px;height:40px;border-radius:50%;background:#0b1a17;border:1px solid #14402f;color:var(--g);font-size:20px;cursor:pointer}
+.menu{position:fixed;top:60px;left:10px;right:10px;background:#071014f5;border:1px solid var(--line);border-radius:14px;z-index:49;transform:translateY(-130%);transition:.4s cubic-bezier(.3,1.4,.5,1);overflow:hidden}
+.menu.open{transform:none}
+.menu a{display:block;padding:15px 18px;border-bottom:1px solid var(--line);font-size:15px}
+.menu a:last-child{border:0}
+#player{position:fixed;top:10px;right:64px;z-index:60;display:flex;align-items:center;gap:8px;height:40px;padding:0 8px 0 5px;border-radius:30px;background:#0a1a16ee;border:1px solid #17503b;box-shadow:0 0 18px rgba(31,242,160,.18);backdrop-filter:blur(8px)}
+#pbtn{width:30px;height:30px;border-radius:50%;border:0;background:var(--g);color:#032016;cursor:pointer;font-size:12px;display:grid;place-items:center;transition:.2s}
+#pbtn:hover{transform:scale(1.12)}
+.eq{display:flex;gap:2px;align-items:flex-end;height:16px}
+.eq i{width:3px;height:4px;background:var(--g);border-radius:2px}
+#player.on .eq i{animation:eq .8s ease-in-out infinite}
+#player.on .eq i:nth-child(2){animation-delay:.15s}#player.on .eq i:nth-child(3){animation-delay:.3s}#player.on .eq i:nth-child(4){animation-delay:.45s}
+@keyframes eq{0%,100%{height:3px}50%{height:16px}}
+#vol{width:0;opacity:0;transition:.3s;accent-color:var(--g);height:4px}
+#player:hover #vol,#player.show #vol{width:62px;opacity:1}
+#player span{font-size:11px;color:var(--mut);max-width:0;overflow:hidden;white-space:nowrap;transition:.3s}
+#player:hover span{max-width:110px}
+@media(min-width:861px){#player{right:20px}.links{margin-right:150px}nav{padding:0 24px}section{padding:90px 24px}}
+.slide h3{text-align:left}
+#lbtn{width:28px;height:28px;border-radius:50%;border:1px solid #17503b;background:#0d2a21;color:var(--g);cursor:pointer;font-size:14px}
+#lbtn:hover{background:var(--g);color:#032016}
+#plist{position:fixed;top:58px;right:10px;width:min(290px,calc(100vw - 20px));z-index:61;background:#08130fef;border:1px solid #1f6a50;border-radius:18px;padding:10px;box-shadow:0 12px 40px #000a,0 0 30px rgba(31,242,160,.15);backdrop-filter:blur(10px);display:none;transform-origin:top right}
+#plist.open{display:block;animation:bounce2 .7s cubic-bezier(.28,.84,.42,1) both}
+@keyframes bounce2{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.07)}70%{transform:scale(.97)}100%{transform:none;opacity:1}}
+#plist .ph{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 10px;color:var(--mut);font-size:13px}
+#plist .ph button{background:none;border:0;color:var(--g);font-size:18px;cursor:pointer;padding:0 6px}
+#items button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--tx);font:500 14px 'Prompt';padding:10px;border-radius:12px;cursor:pointer}
+#items button:hover{background:#0e231c}
+#items button.cur{background:#0f3226;color:var(--g)}
+#items button i{font-style:normal;width:18px;text-align:center;color:var(--g);font-size:12px}
+header.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:90px 20px 60px;overflow:hidden;background:radial-gradient(ellipse at 50% 0,#0b3a2c 0,#04080b 65%)}
+#bg{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero .in{position:relative;z-index:2;max-width:760px}
+.badge{display:inline-block;padding:6px 16px;border-radius:30px;background:#0d2a21;border:1px solid #17503b;color:var(--g);font-size:13px;margin-bottom:18px;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
+h1{font-size:clamp(34px,8vw,68px);font-weight:800;line-height:1.15}
+.hero p{color:var(--mut);margin:16px auto 28px;max-width:560px;font-size:clamp(14px,3.6vw,18px)}
+.btn{display:inline-block;padding:13px 32px;border-radius:40px;border:1px solid #2b5a49;background:#0c1d19;color:var(--tx);font:600 15px 'Prompt';cursor:pointer;transition:.25s;letter-spacing:.5px}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 26px rgba(31,242,160,.3);border-color:var(--g)}
+.btn.pri{background:linear-gradient(135deg,var(--g),var(--g2));color:#032016;border:0}
+.btn+.btn{margin-left:10px}
+.scroll{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:var(--g);font-size:22px;animation:bob 1.6s infinite;z-index:2}
+@keyframes bob{50%{transform:translate(-50%,8px)}}
+section{padding:70px 18px;max-width:1100px;margin:auto}
+h2{font-size:clamp(26px,6vw,40px);text-align:center;font-weight:700;margin-bottom:10px}
+.sub{text-align:center;color:var(--mut);margin-bottom:38px;font-size:14px}
+.reveal{opacity:0;transform:translateY(40px);transition:1s cubic-bezier(.2,.8,.2,1)}
+.reveal.v{opacity:1;transform:none}
+.statsbg{background:linear-gradient(#04080b,#082a24 50%,#04080b);max-width:none}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 10px;max-width:900px;margin:auto;text-align:center}
+.stats b{display:block;font-size:clamp(34px,9vw,58px);color:var(--g);font-weight:800;text-shadow:0 0 24px rgba(31,242,160,.4)}
+.stats span{color:var(--mut);font-size:14px}
+@media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.card{background:linear-gradient(160deg,#0b161b,#070d11);border:1px solid var(--line);border-radius:18px;padding:24px;cursor:pointer;transition:.35s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-8px);border-color:var(--g);box-shadow:0 14px 34px rgba(31,242,160,.15)}
+.card .ic{font-size:30px;margin-bottom:10px}
+.card h3{color:var(--g);font-size:18px;margin-bottom:6px}
+.card p{color:var(--mut);font-size:14px}
+.card em{display:block;margin-top:12px;font-size:12px;color:var(--g);font-style:normal;opacity:.8}
+.slider{position:relative}
+.track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 4px 14px;scrollbar-width:none}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 min(82%,420px);scroll-snap-align:center;height:250px;border-radius:20px;padding:24px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;background:linear-gradient(145deg,#0c241e,#071014)}
+.slide h3{font-size:22px}.slide small{color:var(--g);background:#0d2a21;padding:3px 12px;border-radius:20px;align-self:flex-start;font-size:12px}
+.slide .big{position:absolute;right:14px;bottom:-14px;font-size:120px;opacity:.12;font-weight:800;color:var(--g)}
+.arr{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#0b1317ee;color:var(--tx);cursor:pointer;z-index:3}
+.arr.l{left:-6px}.arr.r{right:-6px}.arr:hover{border-color:var(--g);color:var(--g)}
+.steps{display:grid;gap:16px;counter-reset:s}
+@media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
+.step{border:1px solid var(--line);border-radius:18px;padding:26px;background:#080f13;position:relative}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:-16px;left:22px;width:34px;height:34px;border-radius:50%;background:var(--g);color:#032016;font-weight:800;display:grid;place-items:center}
+.step h3{margin-bottom:6px}.step p{color:var(--mut);font-size:14px}
+.faq{max-width:760px;margin:auto}
+.q{border-bottom:1px solid var(--line)}
+.q button{width:100%;text-align:left;background:none;border:0;color:var(--tx);font:500 16px 'Prompt';padding:18px 4px;cursor:pointer;display:flex;justify-content:space-between}
+.q button::after{content:'⌄';color:var(--g);transition:.3s}
+.q.o button::after{transform:rotate(180deg)}
+.q div{max-height:0;overflow:hidden;color:var(--mut);font-size:14px;transition:.4s}
+.q.o div{max-height:200px;padding-bottom:16px}
+.cta{text-align:center;background:radial-gradient(circle at 50% 0,#0e3e30,#071014 70%);border:1px solid #17503b;border-radius:26px;padding:50px 20px}
+.risk{max-width:900px;margin:30px auto 0;padding:0 18px;color:#6f857c;font-size:12px;text-align:center}
+footer{text-align:center;padding:30px 16px 90px;color:#4e625a;font-size:12px}
+.ov{position:fixed;inset:0;z-index:100;background:#000a;backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:18px}
+.ov.show{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}}
+.pop{width:min(100%,400px);background:linear-gradient(165deg,#0d1d1a,#070d11);border:1px solid #1f6a50;border-radius:24px;padding:30px 24px;text-align:center;box-shadow:0 0 60px rgba(31,242,160,.22);position:relative}
+.ov.show .pop{animation:bounce .8s cubic-bezier(.28,.84,.42,1) both}
+@keyframes bounce{0%{transform:scale(.2) translateY(-120px);opacity:0}45%{transform:scale(1.08) translateY(18px);opacity:1}62%{transform:scale(.95) translateY(-9px)}78%{transform:scale(1.03) translateY(4px)}90%{transform:scale(.99)}100%{transform:none}}
+.pop .em{font-size:48px;display:block;margin-bottom:6px;animation:float 2.2s infinite}
+.pop h3{font-size:22px;margin-bottom:8px}.pop p{color:var(--mut);font-size:14px;margin-bottom:20px}
+.pop .x{position:absolute;top:10px;right:12px;width:32px;height:32px;border-radius:50%;border:0;background:#13242a;color:var(--mut);cursor:pointer;font-size:16px}
+.pop .x:hover{color:var(--g)}
+.pop ul{list-style:none;text-align:left;margin:0 0 20px;font-size:14px;color:var(--mut)}
+.pop li{padding:7px 0;border-bottom:1px dashed var(--line)}.pop li::before{content:'✓ ';color:var(--g);font-weight:700}
+.pop .btn{width:100%;margin:0 0 8px!important}
+@media(max-width:860px){.links{display:none}.burger{display:block}.logo small{display:none}}
+@media(max-width:400px){#player span{display:none}}
+html:not(.js) .page[data-page=home]{display:block}
+.ov{display:none}
+</style>
+
+<nav>
+  <a href="#home" data-go="home" class="logo">Nop.Hedge<b>Gold</b><small>COPY TRADE</small></a>
+  <div class="links"><a href="#home" data-go="home">หน้าแรก</a><a href="#about" data-go="about">เกี่ยวกับ EA</a><a href="#features" data-go="features">จุดเด่น</a><a href="#strategy" data-go="strategy">กลยุทธ์</a><a href="#how" data-go="how">วิธีก็อปปี้</a><a href="#faq" data-go="faq">คำถามที่พบบ่อย</a></div>
+  <button class="burger" id="burger" aria-label="menu">☰</button>
+</nav>
+<div class="menu" id="menu"><a href="#home" data-go="home">หน้าแรก</a><a href="#about" data-go="about">เกี่ยวกับ EA</a><a href="#features" data-go="features">จุดเด่น</a><a href="#strategy" data-go="strategy">กลยุทธ์</a><a href="#how" data-go="how">วิธีก็อปปี้</a><a href="#faq" data-go="faq">คำถามที่พบบ่อย</a></div>
+
+<div id="player" title="เพลงประกอบ">
+  <button id="pbtn" aria-label="เล่น/หยุดเพลง">▶</button>
+  <div class="eq"><i></i><i></i><i></i><i></i></div>
+  <span id="tname">Summer Anthem</span>
+  <button id="lbtn" aria-label="เลือกเพลง">♫</button>
+  <input id="vol" type="range" min="0" max="1" step="0.05" value="0.5" aria-label="เสียง">
+</div>
+<div id="plist"><div class="ph"><b>เลือกเพลง</b><div><button id="pprev" aria-label="ก่อนหน้า">⏮</button><button id="pnext" aria-label="ถัดไป">⏭</button></div></div><div id="items"></div></div>
+<audio id="bgm" preload="auto"></audio>
+
+<main>
+<div class="page" data-page="home">
+<header class="hero" id="top">
+  <canvas id="bg"></canvas>
+  <div class="in">
+    <div class="badge">🥇 Gold EA · Copy Trade เท่านั้น</div>
+    <h1>ก็อปปี้เทรดทองคำ<br><span class="green" style="font-size:.6em;white-space:nowrap">Nop.Hedge Gold EA</span></h1>
+    <p>ระบบเทรดทองคำ (XAUUSD) อัตโนมัติด้วยกลยุทธ์ Hedge ให้บริการแบบ <b>ก็อปปี้เทรด</b> เท่านั้น ไม่ต้องติดตั้งหรือตั้งค่า EA เอง</p>
+    <button class="btn pri" data-pop="demo">ดูวิธีทำงาน</button>
+  </div>
+  <div class="scroll">⌄</div>
+</header>
+
+<section class="statsbg"><div style="max-width:1100px;margin:auto">
+  <h2 class="reveal">ก็อปปี้ง่าย ไม่ซับซ้อน</h2>
+  <p class="sub reveal">&nbsp;</p>
+  <div class="stats reveal">
+    <div><b>XAU</b><span>เทรดทองคำโดยเฉพาะ</span></div>
+    <div><b data-count="24" data-suf="/5">0</b><span>ระบบทำงานอัตโนมัติ</span></div>
+    <div><b data-count="0">0</b><span>ไม่ต้องติดตั้ง EA เอง</span></div>
+    <div><b>Auto</b><span>ก็อปปี้เข้าบัญชีอัตโนมัติ</span></div>
+  </div></div>
+</section>
+</div>
+<div class="page sub" data-page="about">
+<section>
+  <h2 class="reveal">รู้จัก <span class="green">Nop.Hedge Gold EA</span></h2>
+  <p class="sub reveal">เลื่อนดูไฮไลต์ ← →</p>
+  <div class="slider reveal">
+    <button class="arr l" id="prev">‹</button>
+    <div class="track" id="track">
+      <div class="slide"><small>เฉพาะทองคำ</small><h3>เชี่ยวชาญ XAUUSD โดยเฉพาะ</h3><div class="big">XAU</div></div>
+      <div class="slide"><small>กลยุทธ์ Hedge</small><h3>ใช้การ Hedge ช่วยบริหารความเสี่ยงในไม้ที่สวนทาง</h3><div class="big">HEDGE</div></div>
+      <div class="slide"><small>Copy Trade</small><h3>ออเดอร์ถูกก็อปปี้เข้าบัญชีคุณอัตโนมัติ</h3><div class="big">COPY</div></div>
+      <div class="slide"><small>โปร่งใส</small><h3>เห็นทุกออเดอร์ในบัญชีของคุณเอง</h3><div class="big">LIVE</div></div>
+    </div>
+    <button class="arr r" id="next">›</button>
+  </div>
+</section>
+
+</div>
+<div class="page sub" data-page="features">
+<section>
+  <h2 class="reveal">ทำไมต้อง <span class="green">Nop.Hedge Gold EA?</span></h2>
+  <p class="sub reveal">แตะที่การ์ดเพื่อดูรายละเอียด</p>
+  <div class="grid">
+    <div class="card reveal" data-feat="0"><div class="ic">🥇</div><h3>เน้นทองคำ</h3><p>ออกแบบมาเทรด XAUUSD โดยเฉพาะ</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+    <div class="card reveal" data-feat="1"><div class="ic">🛡️</div><h3>กลยุทธ์ Hedge</h3><p>ช่วยบริหารความเสี่ยงเมื่อราคาสวนทาง</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+    <div class="card reveal" data-feat="2"><div class="ic">🔁</div><h3>ก็อปปี้อัตโนมัติ</h3><p>ออเดอร์เข้าบัญชีคุณเองแบบเรียลไทม์</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+    <div class="card reveal" data-feat="3"><div class="ic">🎚️</div><h3>คุมขนาดไม้ได้</h3><p>เลือกสัดส่วนการก็อปปี้ให้เหมาะกับพอร์ต</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+    <div class="card reveal" data-feat="4"><div class="ic">👀</div><h3>โปร่งใส</h3><p>เห็นออเดอร์ในบัญชีตัวเองได้ตลอด</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+    <div class="card reveal" data-feat="5"><div class="ic">🕒</div><h3>ทำงานต่อเนื่อง</h3><p>ระบบทำงานอัตโนมัติ ไม่ต้องเฝ้าหน้าจอ</p><em>แตะเพื่อดูเพิ่มเติม →</em></div>
+  </div>
+</section>
+
+</div>
+<div class="page sub" data-page="strategy">
+<section>
+  <h2 class="reveal">กลยุทธ์ <span class="green">การทำงาน</span></h2>
+  <p class="sub reveal">ภาพรวมการทำงานของระบบ</p>
+  <div class="steps">
+    <div class="step reveal"><h3>วิเคราะห์ทองคำ</h3><p>ติดตามแนวโน้มและความผันผวนของ XAUUSD ตามเงื่อนไขที่ระบบกำหนด</p></div>
+    <div class="step reveal"><h3>เข้าออเดอร์</h3><p>เปิดออเดอร์เมื่อเงื่อนไขครบ พร้อมกฎควบคุมความเสี่ยง</p></div>
+    <div class="step reveal"><h3>Hedge &amp; จัดการ</h3><p>ใช้ไม้ Hedge ช่วยจัดการเมื่อราคาไปทางตรงข้าม แล้วปิดออเดอร์ตามกฎ</p></div>
+  </div>
+</section>
+
+</div>
+<div class="page sub" data-page="how">
+<section>
+  <h2 class="reveal">เริ่มก็อปปี้ใน <span class="green">3 ขั้นตอน</span></h2>
+  <p class="sub reveal">&nbsp;</p>
+  <div class="steps">
+    <div class="step reveal"><h3>เตรียมบัญชีเทรด</h3><p>เปิดบัญชีเทรดทองคำกับโบรกเกอร์ที่รองรับการก็อปปี้เทรด</p></div>
+    <div class="step reveal"><h3>เชื่อมบัญชี</h3><p>เชื่อมบัญชีเทรดของคุณเข้ากับระบบก็อปปี้เทรด</p></div>
+    <div class="step reveal"><h3>ให้ระบบก็อปปี้</h3><p>ออเดอร์จะถูกก็อปปี้เข้าบัญชีคุณอัตโนมัติ ติดตามผลได้ตลอด</p></div>
+  </div>
+</section>
+
+</div>
+<div class="page sub" data-page="faq">
+<section>
+  <h2 class="reveal">คำถามที่พบบ่อย</h2>
+  <p class="sub reveal">&nbsp;</p>
+  <div class="faq reveal">
+    <div class="q"><button>มีขายไฟล์ EA ไหม?</button><div>บริการนี้เป็นแบบ Copy Trade เท่านั้น ไม่มีจำหน่ายไฟล์ EA</div></div>
+    <div class="q"><button>ต้องตั้งค่า EA เองไหม?</button><div>ไม่ต้อง ระบบจะก็อปปี้ออเดอร์เข้าบัญชีคุณโดยอัตโนมัติ</div></div>
+    <div class="q"><button>การันตีกำไรไหม?</button><div>ไม่มีการันตีกำไร การเทรดทองคำมีความเสี่ยงสูง ผลในอดีตไม่ได้รับรองผลในอนาคต</div></div>
+      </div>
+</section>
+</div>
+</main>
+
+<section class="shared">
+  <p class="risk">⚠️ คำเตือนความเสี่ยง: การเทรดทองคำ/Forex/CFD มีความเสี่ยงสูง อาจสูญเสียเงินลงทุนได้ทั้งหมด การก็อปปี้เทรดไม่ได้รับประกันกำไร ผลการดำเนินงานในอดีตไม่ได้รับประกันผลในอนาคต ควรลงทุนเฉพาะเงินที่พร้อมรับความเสี่ยงได้</p>
+</section>
+<footer>© 2026 Nop.Hedge Gold EA · Copy Trade</footer>
+
+<div class="ov" id="ov"><div class="pop" id="pop"></div></div>
+
+<script>
+document.documentElement.classList.add("js");
+try{
+var CONFIG = {
+  // รายการเพลง: ใส่ลิงก์ตรงของแต่ละไฟล์ (Google Drive: https://drive.google.com/uc?export=download&id=FILE_ID)
+  tracks: [
+    {name:"Summer Anthem (1)",          url:"track1.mp3"},
+    {name:"Summer Anthem (2)",          url:"track2.mp3"},
+    {name:"Score a Goal Every Day (1)", url:"track3.mp3"},
+    {name:"Score a Goal Every Day (2)", url:"track4.mp3"},
+    {name:"สู้ สู้ กำไรดี",              url:"track5.mp3"}
+  ]
+};
+var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+$('#burger').onclick=function(){$('#menu').classList.toggle('open')};
+$$('#menu a').forEach(function(a){a.onclick=function(){$('#menu').classList.remove('open')}});
+var bgm=$('#bgm'),pl=$('#player'),pb=$('#pbtn'),loaded=false,userOff=false;
+bgm.volume=.5;
+var TR=CONFIG.tracks,idx=0;
+function ui(){$('#tname').textContent=TR[idx].name;$$('#items button').forEach(function(b,i){b.classList.toggle('cur',i===idx);b.firstChild.textContent=i===idx?'▶':(i+1)})}
+function loadAudio(){if(!loaded){bgm.src=TR[idx].url;loaded=true}}
+function setTrack(i,autoplay){idx=(i+TR.length)%TR.length;bgm.src=TR[idx].url;loaded=true;ui();if(autoplay){userOff=false;bgm.muted=false;var p=bgm.play();if(p&&p.catch)p.catch(function(){})}}
+bgm.onended=function(){setTrack(idx+1,true)};
+$('#items').innerHTML=TR.map(function(t,i){return'<button data-i="'+i+'"><i>'+(i+1)+'</i>'+t.name+'</button>'}).join('');
+$('#items').onclick=function(e){var b=e.target.closest('button');if(b){setTrack(+b.dataset.i,true)}};
+$('#pprev').onclick=function(){setTrack(idx-1,!bgm.paused||!userOff)};
+$('#pnext').onclick=function(){setTrack(idx+1,!bgm.paused||!userOff)};
+$('#lbtn').onclick=function(e){e.stopPropagation();$('#plist').classList.toggle('open')};
+document.addEventListener('click',function(e){if(!e.target.closest('#plist,#lbtn'))$('#plist').classList.remove('open')});
+ui();
+function playM(){loadAudio();bgm.muted=false;var p=bgm.play();if(p&&p.catch)p.catch(function(){});}
+bgm.onplay=function(){pl.classList.add('on');pb.textContent=bgm.muted?'🔇':'❚❚'};
+bgm.onpause=function(){pl.classList.remove('on');pb.textContent='▶'};
+pb.onclick=function(){if(bgm.muted&&!bgm.paused){bgm.muted=false;pb.textContent='❚❚';userOff=false;return}if(bgm.paused){userOff=false;playM()}else{userOff=true;bgm.pause()};pl.classList.add('show');clearTimeout(window._t);window._t=setTimeout(function(){pl.classList.remove('show')},3000)};
+function autoStart(){loadAudio();bgm.muted=false;var p=bgm.play();
+  if(p&&p.then)p.then(function(){off()}).catch(function(){
+    bgm.muted=true;var q=bgm.play();if(q&&q.catch)q.catch(function(){});})}
+var evs=['pointerdown','touchstart','click','keydown','wheel'];
+function on(){evs.forEach(function(e){addEventListener(e,gest,true)})}
+function off(){evs.forEach(function(e){removeEventListener(e,gest,true)})}
+function gest(e){if(userOff)return off();
+  if(!bgm.paused){if(bgm.muted){bgm.muted=false;pb.textContent='❚❚'}return off()}
+  if(e.target.closest&&e.target.closest('[data-act="no-music"],#pbtn'))return;
+  var p=(loaded||loadAudio(),bgm.play());if(p&&p.then)p.then(off).catch(function(){})}
+on();autoStart();
+$('#vol').oninput=function(e){bgm.volume=e.target.value};
+var ov=$('#ov'),pop=$('#pop');
+var FEATS=[
+ ['🥇','เน้นทองคำ',['เทรด XAUUSD โดยเฉพาะ','กฎการเข้าออกเดอร์ชัดเจน','ทำงานอัตโนมัติ']],
+ ['🛡️','กลยุทธ์ Hedge',['ใช้ไม้ Hedge ช่วยเมื่อราคาสวนทาง','มีกฎควบคุมความเสี่ยง','ไม่ใช้อารมณ์ตัดสินใจ']],
+ ['🔁','ก็อปปี้อัตโนมัติ',['ออเดอร์เข้าบัญชีคุณแบบเรียลไทม์','ไม่ต้องติดตั้ง EA เอง','ไม่ต้องนั่งเฝ้าหน้าจอ']],
+ ['🎚️','คุมขนาดไม้ได้',['เลือกสัดส่วนการก็อปปี้ให้เหมาะกับพอร์ต','ปรึกษาขนาดเงินทุนกับผู้ดูแล','ปรับได้ตามความเสี่ยงที่รับได้']],
+ ['👀','โปร่งใส',['เห็นทุกออเดอร์ในบัญชีของคุณเอง','เงินอยู่ในบัญชีเทรดของคุณ','ติดตามผลได้ตลอด']],
+ ['🕒','ทำงานต่อเนื่อง',['ระบบทำงานอัตโนมัติ 24/5','ไม่ต้องเฝ้าหน้าจอ','ออเดอร์เข้าบัญชีคุณเอง']]
+];
+var T={
+ music:{em:'🎵',t:'ยินดีต้อนรับ',p:'เว็บนี้มีเพลงประกอบ แตะเพื่อเข้าสู่เว็บไซต์ได้เลย ปรับเสียงหรือปิดได้ที่มุมขวาบน',b:[['🎧 เข้าสู่เว็บไซต์','pri','music-on'],['เข้าแบบไม่มีเพลง','','no-music']]},
+ demo:{em:'📈',t:'วิธีทำงาน',list:['วิเคราะห์ทองคำ (XAUUSD) อัตโนมัติ','เข้าออเดอร์พร้อมกฎควบคุมความเสี่ยง','ใช้ Hedge จัดการเมื่อราคาสวนทาง','ก็อปปี้เข้าบัญชีคุณโดยอัตโนมัติ'],b:[['ปิด','pri','close']]},
+};
+function open(o){
+  var h='<button class="x" aria-label="ปิด">✕</button><span class="em">'+o.em+'</span><h3>'+o.t+'</h3>';
+  if(o.p)h+='<p>'+o.p+'</p>';
+  if(o.list)h+='<ul>'+o.list.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ul>';
+  (o.b||[]).forEach(function(b){h+='<button class="btn '+b[1]+'" data-act="'+b[2]+'">'+b[0]+'</button>'});
+  pop.innerHTML=h;
+  ov.classList.remove('show');void ov.offsetWidth;ov.classList.add('show');
+}
+function close(){ov.classList.remove('show')}
+function act(a){
+  if(a==='close')return close();
+  if(a==='music-on'){userOff=false;playM();return close()}
+  if(a==='no-music'){userOff=true;bgm.pause();return close()}
+  if(T[a])open(T[a]);
+}
+ov.addEventListener('click',function(e){
+  if(e.target===ov||e.target.classList.contains('x'))return close();
+  var a=e.target.getAttribute('data-act');if(a)act(a);
+});
+$$('[data-pop]').forEach(function(b){b.onclick=function(){act(b.getAttribute('data-pop'))}});
+$$('[data-feat]').forEach(function(c){c.onclick=function(){
+  var f=FEATS[+c.getAttribute('data-feat')];
+  open({em:f[0],t:f[1],list:f[2],b:[['ปิด','pri','close']]});
+}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+setTimeout(function(){open(T.music)},500);
+var tr=$('#track');
+function slide(d){tr.scrollBy({left:d*(tr.firstElementChild.offsetWidth+16),behavior:'smooth'})}
+$('#next').onclick=function(){slide(1)};$('#prev').onclick=function(){slide(-1)};
+setInterval(function(){
+  if(tr.scrollLeft+tr.clientWidth>=tr.scrollWidth-10)tr.scrollTo({left:0,behavior:'smooth'});else slide(1)
+},4200);
+$$('.q button').forEach(function(b){b.onclick=function(){var q=b.parentNode,o=q.classList.contains('o');$$('.q').forEach(function(x){x.classList.remove('o')});if(!o)q.classList.add('o')}});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('v');
+  $$('[data-count]',e.target).forEach(count);io.unobserve(e.target)}})},{threshold:.15});
+$$('.reveal').forEach(function(el){io.observe(el)});
+function count(el){var n=+el.dataset.count,s=el.dataset.suf||'',t0=null;
+  (function f(t){t0=t0||t;var p=Math.min((t-t0)/1400,1);el.textContent=Math.round(n*(1-Math.pow(1-p,3)))+s;if(p<1)requestAnimationFrame(f)})(performance.now())}
+var PAGES=['home','about','features','strategy','how','faq'];
+function go(name){
+  if(PAGES.indexOf(name)<0)name='home';
+  $$('.page').forEach(function(p){p.classList.toggle('act',p.getAttribute('data-page')===name)});
+  $$('[data-go]').forEach(function(a){a.classList.toggle('cur',a.getAttribute('data-go')===name&&a.tagName==='A'&&!a.classList.contains('logo'))});
+  $('#menu').classList.remove('open');
+  window.scrollTo(0,0);
+  $$('.page.act .reveal').forEach(function(el){el.classList.remove('v');io.observe(el)});
+}
+function route(){go((location.hash||'#home').replace('#',''))}
+addEventListener('hashchange',route);
+$$('[data-go]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var n=a.getAttribute('data-go');if(location.hash==='#'+n)go(n);else location.hash=n})});
+route();
+(function(){
+  var c=$('#bg'),x=c.getContext('2d'),W,H,cs=[];
+  function rs(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight;cs=[];var n=Math.ceil(W/26),p=H*.55;
+    for(var i=0;i<n;i++){var o=p,cl=p+(Math.random()-.47)*34;p=cl;cs.push({o:o,c:cl,h:Math.max(o,cl)+Math.random()*14,l:Math.min(o,cl)-Math.random()*14})}}
+  rs();addEventListener('resize',rs);
+  var off=0;
+  (function d(){x.clearRect(0,0,W,H);off=(off+.25)%26;
+    cs.forEach(function(k,i){var px=i*26-off,up=k.c<k.o,col=up?'#1ff2a0':'#18665a';
+      x.strokeStyle=col;x.fillStyle=col;x.lineWidth=1.3;
+      x.beginPath();x.moveTo(px+7,k.h);x.lineTo(px+7,k.l);x.stroke();
+      x.fillRect(px+2,Math.min(k.o,k.c),10,Math.max(Math.abs(k.c-k.o),2))});
+    requestAnimationFrame(d)})();
+})();
+
+}catch(err){console.log(err)}
+</script>
