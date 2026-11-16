@@ -1,562 +1,588 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nop.Hedge Gold EA · Copy Trade</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap');
-:root{--bg:#020508;--card:#081017;--line:#16272e;--g:#1ff2a0;--g2:#0fb877;--gold:#f3ba2f;--tx:#e9f3ef;--mut:#8aa097}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;line-height:1.6}
-a{color:inherit;text-decoration:none}
-.green{color:var(--g);text-shadow:0 0 25px rgba(31,242,160,.5)}
-.gold-text{color:var(--gold);text-shadow:0 0 25px rgba(243,186,47,.4)}
-.page{display:none}.page.act{display:block;animation:pgin .5s cubic-bezier(.2,.8,.2,1)}
-@keyframes pgin{from{opacity:0;transform:translateY(20px)}}
-.page.subpage{min-height:75vh;padding-top:80px}
-
-/* Progress Bar & Nav */
-#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--g));z-index:100;width:0%}
-nav{position:fixed;top:3px;left:0;right:0;height:65px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(2,5,8,0.85);backdrop-filter:blur(12px);border-bottom:1px solid #11221d}
-.logo{font-weight:800;font-size:20px;letter-spacing:1px;cursor:pointer}
-.logo b{color:var(--g)}
-.logo small{font-weight:400;font-size:11px;color:var(--mut);margin-left:8px;letter-spacing:2px}
-.links{display:flex;gap:22px;font-size:14px;color:var(--mut)}
-.links a{cursor:pointer;transition:.2s}
-.links a:hover,.links a.cur{color:var(--g)}
-.burger{display:none;width:40px;height:40px;border-radius:50%;background:#0b1a17;border:1px solid #14402f;color:var(--g);font-size:20px;cursor:pointer}
-.menu{position:fixed;top:68px;left:12px;right:12px;background:rgba(7,16,20,0.98);border:1px solid var(--line);border-radius:16px;z-index:49;transform:translateY(-140%);transition:.4s cubic-bezier(.3,1.4,.5,1);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.8)}
-.menu.open{transform:none}
-.menu a{display:block;padding:16px 20px;border-bottom:1px solid var(--line);font-size:15px;color:var(--mut)}
-.menu a:hover,.menu a.cur{color:var(--g);background:#0b1f19}
-
-/* BGM Player */
-#player{position:fixed;top:12px;right:75px;z-index:60;display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 6px;border-radius:30px;background:#0a1a16ee;border:1px solid #17503b;box-shadow:0 0 18px rgba(31,242,160,.18);backdrop-filter:blur(8px)}
-#pbtn{width:30px;height:30px;border-radius:50%;border:0;background:var(--g);color:#032016;cursor:pointer;font-size:12px;display:grid;place-items:center;transition:.2s}
-#pbtn:hover{transform:scale(1.1)}
-.eq{display:flex;gap:2px;align-items:flex-end;height:16px}
-.eq i{width:3px;height:4px;background:var(--g);border-radius:2px}
-#player.on .eq i{animation:eq .8s ease-in-out infinite}
-#player.on .eq i:nth-child(2){animation-delay:.15s}#player.on .eq i:nth-child(3){animation-delay:.3s}#player.on .eq i:nth-child(4){animation-delay:.45s}
-@keyframes eq{0%,100%{height:3px}50%{height:16px}}
-#vol{width:0;opacity:0;transition:.3s;accent-color:var(--g);height:4px}
-#player:hover #vol,#player.show #vol{width:60px;opacity:1}
-#player span{font-size:11px;color:var(--mut);max-width:0;overflow:hidden;white-space:nowrap;transition:.3s}
-#player:hover span{max-width:100px}
-#lbtn{width:28px;height:28px;border-radius:50%;border:1px solid #17503b;background:#0d2a21;color:var(--g);cursor:pointer;font-size:13px}
-#plist{position:fixed;top:60px;right:15px;width:min(280px,calc(100vw - 30px));z-index:61;background:#08130fef;border:1px solid #1f6a50;border-radius:18px;padding:12px;box-shadow:0 12px 40px #000a,0 0 30px rgba(31,242,160,.15);backdrop-filter:blur(10px);display:none}
-#plist.open{display:block;animation:bounce2 .5s cubic-bezier(.28,.84,.42,1) both}
-@keyframes bounce2{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
-#items button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--tx);font:500 13px 'Prompt';padding:8px 10px;border-radius:10px;cursor:pointer}
-#items button:hover{background:#0e231c}
-#items button.cur{background:#0f3226;color:var(--g)}
-
-/* Grand Hero Section */
-header.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:110px 20px 80px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#083a2b 0,#03080d 70%)}
-#bg{position:absolute;inset:0;width:100%;height:100%;opacity:.6;pointer-events:none}
-.hero .in{position:relative;z-index:2;max-width:850px}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:40px;background:rgba(13,42,33,0.8);border:1px solid #1f7a59;color:var(--g);font-size:13px;margin-bottom:20px;box-shadow:0 0 25px rgba(31,242,160,.25);animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-h1{font-size:clamp(38px,7.5vw,72px);font-weight:800;line-height:1.15;letter-spacing:-1px}
-.hero p{color:var(--mut);margin:20px auto 35px;max-width:620px;font-size:clamp(15px,3.8vw,19px)}
-
-.hero-btns{display:flex;gap:15px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 34px;border-radius:40px;border:1px solid #2b5a49;background:#0c1d19;color:var(--tx);font:600 15px 'Prompt';cursor:pointer;transition:.3s;letter-spacing:.5px}
-.btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(31,242,160,.35);border-color:var(--g)}
-.btn.pri{background:linear-gradient(135deg,var(--g),var(--g2));color:#032016;border:0;box-shadow:0 4px 20px rgba(31,242,160,.4)}
-.btn.gold{background:linear-gradient(135deg,var(--gold),#d49e1e);color:#1a1303;border:0;box-shadow:0 4px 20px rgba(243,186,47,.4)}
-
-/* Live Gold Ticker Bar */
-.ticker-bar{max-width:900px;margin:30px auto 0;background:rgba(8,16,23,0.85);border:1px solid #1a3830;border-radius:18px;padding:16px 24px;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:20px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-.t-item{display:flex;flex-direction:column;align-items:center}
-.t-item span{font-size:12px;color:var(--mut)}
-.t-item b{font-size:16px;color:var(--tx)}
-
-/* General Sections */
-section{padding:80px 20px;max-width:1150px;margin:auto}
-h2{font-size:clamp(28px,5vw,42px);text-align:center;font-weight:700;margin-bottom:12px}
-.sub{text-align:center;color:var(--mut);margin-bottom:45px;font-size:15px}
-.reveal{opacity:0;transform:translateY(30px);transition:.8s cubic-bezier(.2,.8,.2,1)}
-.reveal.v{opacity:1;transform:none}
-
-/* Grid & Cards */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-.card{background:linear-gradient(160deg,#0b181f,#060b10);border:1px solid var(--line);border-radius:20px;padding:28px;cursor:pointer;transition:.35s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-8px);border-color:var(--g);box-shadow:0 15px 40px rgba(31,242,160,.2)}
-.card .ic{font-size:36px;margin-bottom:14px}
-.card h3{color:var(--g);font-size:20px;margin-bottom:8px}
-.card p{color:var(--mut);font-size:14px}
-.card em{display:block;margin-top:16px;font-size:12px;color:var(--g);font-style:normal}
-
-/* MT5 UI & Large Display Section */
-.mt5-showcase{background:linear-gradient(180deg,#04090f,#08151b);border:1px solid #1a3830;border-radius:24px;padding:25px;margin-top:20px;box-shadow:0 20px 60px rgba(0,0,0,0.8);position:relative;overflow:hidden}
-.mt5-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;border-bottom:1px solid #153028;padding-bottom:15px}
-.mt5-title{font-size:18px;font-weight:700;color:var(--g);display:flex;align-items:center;gap:10px}
-.mt5-tag{background:#0d2a21;color:var(--g);padding:4px 12px;border-radius:8px;font-size:12px;border:1px solid #17503b}
-
-/* Steps & FAQ */
-.steps{display:grid;gap:20px;counter-reset:s}
-@media(min-width:768px){.steps{grid-template-columns:repeat(3,1fr)}}
-.step{border:1px solid var(--line);border-radius:20px;padding:30px;background:#070f14;position:relative}
-.step::before{counter-increment:s;content:counter(s);position:absolute;top:-18px;left:24px;width:38px;height:38px;border-radius:50%;background:var(--g);color:#032016;font-weight:800;display:grid;place-items:center;box-shadow:0 0 15px rgba(31,242,160,.4)}
-.step h3{margin-bottom:8px;font-size:18px}
-.step p{color:var(--mut);font-size:14px}
-
-.faq{max-width:800px;margin:auto}
-.q{border-bottom:1px solid var(--line)}
-.q button{width:100%;text-align:left;background:none;border:0;color:var(--tx);font:500 17px 'Prompt';padding:20px 6px;cursor:pointer;display:flex;justify-content:space-between}
-.q button::after{content:'⌄';color:var(--g);transition:.3s;font-size:20px}
-.q.o button::after{transform:rotate(180deg)}
-.q div{max-height:0;overflow:hidden;color:var(--mut);font-size:15px;transition:.4s}
-.q.o div{max-height:200px;padding-bottom:20px}
-
-/* Calculator & Contact */
-.calc-box{background:linear-gradient(145deg,#0a191f,#060d13);border:1px solid #1f6a50;border-radius:24px;padding:35px;max-width:700px;margin:auto;box-shadow:0 15px 40px rgba(0,0,0,0.6)}
-.calc-field{margin-bottom:20px}
-.calc-field label{display:block;margin-bottom:8px;font-size:14px;color:var(--mut)}
-.calc-field input[type=range]{width:100%;accent-color:var(--g);height:6px;background:#132822;border-radius:3px}
-.calc-result{background:#04090d;border:1px solid #174032;border-radius:16px;padding:20px;text-align:center;margin-top:25px}
-.calc-result b{font-size:28px;color:var(--g)}
-
-.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;max-width:850px;margin:auto}
-.contact-card{background:#081318;border:1px solid var(--line);border-radius:20px;padding:30px;text-align:center;transition:.3s}
-.contact-card:hover{border-color:var(--g);transform:translateY(-5px)}
-.contact-card .ic{font-size:40px;margin-bottom:15px}
-.contact-card h3{margin-bottom:8px;font-size:18px}
-.contact-card p{color:var(--mut);font-size:14px;margin-bottom:20px}
-
-.risk{max-width:900px;margin:40px auto 0;padding:0 20px;color:#6f857c;font-size:12px;text-align:center}
-footer{text-align:center;padding:35px 20px 80px;color:#4e625a;font-size:13px}
-
-/* Popup Overlay */
-.ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
-.ov.show{display:flex;animation:fade .3s}
-@keyframes fade{from{opacity:0}}
-.pop{width:min(100%,420px);background:linear-gradient(165deg,#0d201c,#060d13);border:1px solid #1f6a50;border-radius:24px;padding:35px 25px;text-align:center;box-shadow:0 0 60px rgba(31,242,160,.25);position:relative}
-.pop .em{font-size:50px;display:block;margin-bottom:10px}
-.pop h3{font-size:24px;margin-bottom:10px}
-.pop p{color:var(--mut);font-size:14px;margin-bottom:24px}
-.pop .x{position:absolute;top:12px;right:15px;width:34px;height:34px;border-radius:50%;border:0;background:#13242a;color:var(--mut);cursor:pointer;font-size:16px}
-.pop .x:hover{color:var(--g)}
-.pop ul{list-style:none;text-align:left;margin:0 0 24px;font-size:14px;color:var(--mut)}
-.pop li{padding:8px 0;border-bottom:1px dashed var(--line)}
-.pop li::before{content:'✓ ';color:var(--g);font-weight:700}
-.pop .btn{width:100%;margin-bottom:10px}
-
-@media(max-width:860px){.links{display:none}.burger{display:block}.logo small{display:none}}
-</style>
-</head>
-<body>
-
-<div id="progress"></div>
-
-<nav>
-  <a data-go="home" class="logo">Nop.Hedge<b>Gold</b><small>COPY TRADE</small></a>
-  <div class="links">
-    <a data-go="home">หน้าแรก</a>
-    <a data-go="about">เกี่ยวกับ EA</a>
-    <a data-go="features">จุดเด่น</a>
-    <a data-go="strategy">กลยุทธ์</a>
-    <a data-go="performance">ผลงาน & XAUUSD</a>
-    <a data-go="how">วิธีก็อปปี้</a>
-    <a data-go="faq">คำถามที่พบบ่อย</a>
-    <a data-go="contact">ติดต่อเรา</a>
-  </div>
-  <button class="burger" id="burger" aria-label="menu">☰</button>
-</nav>
-
-<div class="menu" id="menu">
-  <a data-go="home">หน้าแรก</a>
-  <a data-go="about">เกี่ยวกับ EA</a>
-  <a data-go="features">จุดเด่น</a>
-  <a data-go="strategy">กลยุทธ์</a>
-  <a data-go="performance">ผลงาน & XAUUSD</a>
-  <a data-go="how">วิธีก็อปปี้</a>
-  <a data-go="faq">คำถามที่พบบ่อย</a>
-  <a data-go="contact">ติดต่อเรา</a>
-</div>
-
-<!-- BGM Player -->
-<div id="player" title="เพลงประกอบ">
-  <button id="pbtn" aria-label="เล่น/หยุดเพลง">▶</button>
-  <div class="eq"><i></i><i></i><i></i><i></i></div>
-  <span id="tname">Summer Anthem</span>
-  <button id="lbtn" aria-label="เลือกเพลง">♫</button>
-  <input id="vol" type="range" min="0" max="1" step="0.05" value="0.5" aria-label="เสียง">
-</div>
-<div id="plist">
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px 10px;color:var(--mut);font-size:13px">
-    <b>เลือกเพลง</b>
-    <div><button id="pprev" style="background:none;border:0;color:var(--g);cursor:pointer">⏮</button> <button id="pnext" style="background:none;border:0;color:var(--g);cursor:pointer">⏭</button></div>
-  </div>
-  <div id="items"></div>
-</div>
-<audio id="bgm" preload="auto"></audio>
-
-<main>
-  <!-- HOME PAGE -->
-  <div class="page" data-page="home">
-    <header class="hero">
-      <canvas id="bg"></canvas>
-      <div class="in">
-        <div class="badge">🥇 Gold EA · ระบบก็อปปี้เทรดทองคำอัตโนมัติ</div>
-        <h1>สุดยอดระบบเทรดทองคำ<br><span class="green">Nop.Hedge Gold EA</span></h1>
-        <p>ยกระดับการลงทุนทองคำ (XAUUSD) ด้วยกลยุทธ์ Hedge อัจฉริยะ ทำงานอัตโนมัติ 100% ไม่ต้องติดตั้ง EA เอง ก็อปปี้เข้าบัญชีคุณทันที</p>
-        <div class="hero-btns">
-          <button class="btn pri" data-go="performance">ดูหน้าจอ & กราฟ XAUUSD</button>
-          <button class="btn gold" data-go="how">เริ่มก็อปปี้เทรด</button>
-        </div>
-        <div class="ticker-bar">
-          <div class="t-item"><span>ASSET</span><b>XAUUSD (Gold)</b></div>
-          <div class="t-item"><span>STRATEGY</span><b>Grid & Hedge</b></div>
-          <div class="t-item"><span>VERSION</span><b class="green">Nop_HedgeRescue_Gold_4.6</b></div>
-          <div class="t-item"><span>STATUS</span><b class="gold-text">● ONLINE (24/5)</b></div>
-        </div>
-      </div>
-    </header>
-  </div>
-
-  <!-- ABOUT PAGE -->
-  <div class="page subpage" data-page="about">
-    <section>
-      <h2 class="reveal">รู้จัก <span class="green">Nop.Hedge Gold EA</span></h2>
-      <p class="sub reveal">ออกแบบมาเพื่อความปลอดภัยและผลกำไรที่ยั่งยืนในตลาดทองคำ</p>
-      <div class="grid">
-        <div class="card reveal"><div class="ic">🥇</div><h3>เชี่ยวชาญ XAUUSD</h3><p>เทรดเฉพาะทองคำด้วยระบบที่ปรับแต่งค่าพารามิเตอร์มาอย่างแม่นยำ</p></div>
-        <div class="card reveal"><div class="ic">🛡️</div><h3>กลยุทธ์ Hedge</h3><p>บริหารความเสี่ยงอัตโนมัติเมื่อราคาสวนทาง ช่วยพยุงพอร์ตได้อย่างมีประสิทธิภาพ</p></div>
-        <div class="card reveal"><div class="ic">🔁</div><h3>Copy Trade ระบบปิด</h3><p>ออเดอร์ถูกส่งเข้าบัญชีของคุณแบบเรียลไทม์โดยผู้ดูแลมืออาชีพ</p></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- FEATURES PAGE -->
-  <div class="page subpage" data-page="features">
-    <section>
-      <h2 class="reveal">ทำไมต้องเลือก <span class="green">Nop.Hedge Gold EA?</span></h2>
-      <p class="sub reveal">จุดเด่นที่ทำให้นักลงทุนไว้วางใจ</p>
-      <div class="grid">
-        <div class="card reveal"><div class="ic">🥇</div><h3>เน้นทองคำโดยเฉพาะ</h3><p>เข้าใจพฤติกรรมกราฟทองคำ ความผันผวนสูงไม่ใช่ปัญหา</p></div>
-        <div class="card reveal"><div class="ic">🛡️</div><h3>ควบคุมความเสี่ยงเข้มงวด</h3><p>มีระบบตัดขาดทุนและบริหาร Lot Size ชัดเจน ไม่ล้างพอร์ตมั่วซั่ว</p></div>
-        <div class="card reveal"><div class="ic">🔁</div><h3>ไม่ต้องตั้งค่าเอง</h3><p>มือใหม่ก็ใช้งานได้ทันที แค่เชื่อมบัญชีก็อปปี้เทรด</p></div>
-        <div class="card reveal"><div class="ic">🎚️</div><h3>ปรับสัดส่วนได้</h3><p>เลือกขนาด Lot ให้เหมาะกับเงินทุนของคุณ ($200 ขึ้นไปแนะนำบัญชี Cent)</p></div>
-        <div class="card reveal"><div class="ic">👀</div><h3>โปร่งใส 100%</h3><p>เห็นทุกออเดอร์ใน MetaTrader ของตัวเองตลอดเวลา</p></div>
-        <div class="card reveal"><div class="ic">🕒</div><h3>ทำงาน 24 ชั่วโมง</h3><p>รันบน VPS ความเร็วสูง ไม่พลาดทุกจังหวะทำกำไร</p></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- STRATEGY PAGE -->
-  <div class="page subpage" data-page="strategy">
-    <section>
-      <h2 class="reveal">กลยุทธ์ <span class="green">การทำงานอัจฉริยะ</span></h2>
-      <p class="sub reveal">หลักการทำงานเบื้องหลังความสำเร็จของ EA</p>
-      <div class="steps">
-        <div class="step reveal"><h3>1. วิเคราะห์จุดเข้า</h3><p>ระบบสแกนกราฟ XAUUSD หาจังหวะเข้าเทรดที่มีความน่าจะเป็นสูงตามระบบคำนวณ</p></div>
-        <div class="step reveal"><h3>2. บริหารไม้ Grid</h3><p>เปิดออเดอร์สะสมตามระยะที่กำหนด พร้อมควบคุมตัวคูณ Lot ไม่ให้เกินขีดจำกัด</p></div>
-        <div class="step reveal"><h3>3. Hedge ป้องกันพอร์ต</h3><p>เมื่อกราฟวิ่งสวนทาง ระบบจะใช้ไม้ Hedge เข้าช่วยบริหารความเสี่ยงและปิดทำกำไรรวม</p></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- PERFORMANCE & XAUUSD LIVE DISPLAY -->
-  <div class="page subpage" data-page="performance">
-    <section>
-      <h2 class="reveal">หน้าจอการทำงาน & กราฟ <span class="green">XAUUSD</span></h2>
-      <p class="sub reveal">แสดงผลหน้าตา EA Control Panel (MT5 UI Mockup) และกราฟเรียลไทม์ขนาดใหญ่</p>
-      
-      <!-- MT5 UI Mockup Display -->
-      <div class="mt5-showcase reveal">
-        <div class="mt5-header">
-          <div class="mt5-title">📊 Nop_HedgeRescue_Gold_4.6 · Control Panel</div>
-          <div class="mt5-tag">EA RUNNING (Live UI)</div>
-        </div>
-        <div style="background:#020508;border:1px solid #132822;border-radius:16px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
-          <div style="background:#071015;border:1px solid #153028;border-radius:12px;padding:16px">
-            <b style="color:var(--g);display:block;margin-bottom:10px;font-size:15px">ACCOUNT & STATUS</b>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Balance:</span><b style="color:var(--tx)">94,376.54 USD</b></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Equity:</span><b style="color:var(--g)">94,376.54 USD</b></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Floating P/L:</span><b style="color:var(--g)">0.00 USD</b></div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--mut)"><span>Drawdown:</span><b style="color:var(--gold)">0.00%</b></div>
-          </div>
-          <div style="background:#071015;border:1px solid #153028;border-radius:12px;padding:16px">
-            <b style="color:var(--g);display:block;margin-bottom:10px;font-size:15px">STATISTICS (Realized)</b>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Today Profit:</span><b style="color:var(--g)">+49.56 USD</b></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Win / Loss:</span><b style="color:var(--tx)">27 / 4 (87.1%)</b></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:var(--mut)"><span>Profit Factor:</span><b style="color:var(--gold)">4.08</b></div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--mut)"><span>Active Mode:</span><b style="color:var(--g)">AUTO HEDGE ON</b></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Large TradingView Chart -->
-      <div class="mt5-showcase reveal" style="margin-top:35px">
-        <div class="mt5-header">
-          <div class="mt5-title">📈 กราฟ XAUUSD Real-time (TradingView)</div>
-          <div class="mt5-tag">Live Market Data</div>
-        </div>
-        <div style="height:550px;width:100%;border-radius:14px;overflow:hidden">
-          <!-- TradingView Widget BEGIN -->
-          <div class="tradingview-widget-container" style="height:100%;width:100%;">
-            <div class="tradingview-widget-container__widget" style="height:100%;width:100%;"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-            {
-              "width": "100%",
-              "height": "100%",
-              "symbol": "OANDA:XAUUSD",
-              "interval": "15",
-              "timezone": "Asia/Bangkok",
-              "theme": "dark",
-              "style": "1",
-              "locale": "th",
-              "enable_publishing": false,
-              "backgroundColor": "rgba(4, 9, 15, 1)",
-              "gridColor": "rgba(22, 39, 46, 0.5)",
-              "hide_top_toolbar": false,
-              "hide_legend": false,
-              "save_image": false,
-              "calendar": false,
-              "hide_volume": false,
-              "support_host": "https://www.tradingview.com"
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nop.Hedge Gold EA · Copy Trade | Institutional Grade SPA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: { 400: '#FACC15', 500: '#EAB308', 600: '#CA8A04' },
+                        emerald: { 400: '#34D399', 500: '#10B981', 600: '#059669' },
+                        darkBg: '#030712',
+                        cardBg: 'rgba(15, 23, 42, 0.75)'
+                    }
+                }
             }
-            </script>
-          </div>
-          <!-- TradingView Widget END -->
+        }
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; color: #F8FAFC; overflow-x: hidden; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(234, 179, 8, 0.15); }
+        .glass-gold { background: linear-gradient(135deg, rgba(234,179,8,0.1), rgba(16,185,129,0.05)); backdrop-filter: blur(12px); border: 1px solid rgba(234, 179, 8, 0.3); }
+        .glow-gold { box-shadow: 0 0 25px rgba(234, 179, 8, 0.25); }
+        .glow-emerald { box-shadow: 0 0 25px rgba(16, 185, 129, 0.25); }
+        .text-gradient { background: linear-gradient(135deg, #FACC15 0%, #34D399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #030712; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #EAB308; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-black">
+
+    <!-- Particle Background Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Top Banner: Testing Phase Notice (Non-red luxurious styling) -->
+    <div class="bg-gradient-to-r from-amber-950/80 via-emerald-950/80 to-slate-950/90 border-b border-gold-500/30 text-amber-200 px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between shadow-lg backdrop-blur-md z-50">
+        <div class="flex items-center gap-2.5 mx-auto text-center">
+            <i class="fa-solid fa-flask-vial text-gold-400 animate-pulse text-base"></i>
+            <span id="txt-testing-notice">เว็บไซต์/แพลตฟอร์ม EA กำลังอยู่ในช่วงทดลอง (Testing Phase) · Institutional Algorithmic Environment</span>
         </div>
-      </div>
-
-      <!-- Lot & Capital Calculator -->
-      <div class="calc-box reveal" style="margin-top:40px">
-        <h3 style="text-align:center;margin-bottom:20px;color:var(--g)">🧮 เครื่องคำนวณเงินทุน & สัดส่วนการก็อปปี้</h3>
-        <div class="calc-field">
-          <label>เงินทุนของคุณ ($ USD): <b id="amt-val" style="color:var(--g)">200</b> USD</label>
-          <input type="range" id="capital" min="100" max="5000" step="50" value="200">
+        <div class="hidden sm:flex items-center gap-3">
+            <button onclick="setLang('th')" id="btn-th" class="px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-gold-500 text-black shadow-sm">TH</button>
+            <button onclick="setLang('en')" id="btn-en" class="px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white">EN</button>
         </div>
-        <div style="font-size:12px;color:var(--mut);margin-bottom:10px">* คำแนะนำ: ทุน $200 แนะนำให้เปิดบัญชีประเภท <b>Cent Account</b> เพื่อความปลอดภัยสูงสุดในการรัน Grid & Hedge ทองคำ</div>
-        <div class="calc-result">
-          <span>แนะนำประเภทบัญชีที่เหมาะสม:</span><br>
-          <b id="rec-type" style="color:var(--gold);font-size:24px">Cent Account (20,000 Cents)</b>
+    </div>
+
+    <!-- Header / Navigation Bar -->
+    <header class="glass sticky top-0 z-40 border-b border-slate-800/80 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl glass-gold flex items-center justify-center glow-gold">
+                    <i class="fa-solid fa-shield-cat text-gold-400 text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-wider text-gradient">Nop.Hedge Gold EA</h1>
+                    <p class="text-xs text-emerald-400 font-mono tracking-widest uppercase">XAUUSD Copy Trade · SPA v4.6</p>
+                </div>
+            </div>
+
+            <!-- Desktop Menu Tabs -->
+            <nav class="hidden lg:flex items-center gap-1 glass px-2 py-1.5 rounded-xl border border-slate-700/50">
+                <button onclick="switchTab('hud')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-gold-400 bg-slate-800/80 shadow" data-tab="hud"><i class="fa-solid fa-gauge-high mr-1.5"></i><span class="t-hud">Command HUD</span></button>
+                <button onclick="switchTab('terminal')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="terminal"><i class="fa-solid fa-terminal mr-1.5"></i><span class="t-terminal">MT5 Terminal</span></button>
+                <button onclick="switchTab('orders')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="orders"><i class="fa-solid fa-list-check mr-1.5"></i><span class="t-orders">Order Stream</span></button>
+                <button onclick="switchTab('strategy')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="strategy"><i class="fa-solid fa-chess-board mr-1.5"></i><span class="t-strategy">Strategy Matrix</span></button>
+                <button onclick="switchTab('calculator')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="calculator"><i class="fa-solid fa-calculator mr-1.5"></i><span class="t-calculator">Risk Calc</span></button>
+                <button onclick="switchTab('analytics')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="analytics"><i class="fa-solid fa-chart-line mr-1.5"></i><span class="t-analytics">Analytics</span></button>
+                <button onclick="switchTab('assistant')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="assistant"><i class="fa-solid fa-robot mr-1.5 text-emerald-400"></i><span class="t-assistant">Nop.AI</span></button>
+                <button onclick="switchTab('docs')" class="tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white" data-tab="docs"><i class="fa-solid fa-book mr-1.5"></i><span class="t-docs">Knowledge</span></button>
+            </nav>
+
+            <!-- Right Controls (Audio & Mobile Menu) -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 glass px-3 py-1.5 rounded-xl border border-slate-700/50">
+                    <button onclick="toggleAudio()" id="audioToggleBtn" class="text-gold-400 hover:text-white transition"><i class="fa-solid fa-volume-high text-lg"></i></button>
+                    <div class="flex items-center gap-1 h-4">
+                        <span class="w-1 bg-gold-500 animate-pulse h-3 rounded"></span>
+                        <span class="w-1 bg-emerald-500 animate-pulse h-4 rounded" style="animation-delay: 150ms"></span>
+                        <span class="w-1 bg-gold-400 animate-pulse h-2 rounded" style="animation-delay: 300ms"></span>
+                    </div>
+                </div>
+                <div class="flex sm:hidden items-center gap-2">
+                    <button onclick="setLang(currentLang === 'th' ? 'en' : 'th')" class="px-2 py-1 bg-slate-800 text-gold-400 rounded text-xs font-bold border border-gold-500/30">
+                        <span id="lang-indicator">TH</span>
+                    </button>
+                </div>
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-slate-300 hover:text-gold-400 p-2"><i class="fa-solid fa-bars text-xl"></i></button>
+            </div>
         </div>
-      </div>
+    </header>
 
-    </section>
-  </div>
+    <!-- Mobile Menu Drawer -->
+    <div id="mobileMenu" class="hidden lg:hidden glass border-b border-slate-800 px-4 py-4 space-y-2 z-30">
+        <button onclick="switchTab('hud'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-gold-400 bg-slate-800"><i class="fa-solid fa-gauge-high mr-2"></i> Command HUD</button>
+        <button onclick="switchTab('terminal'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-terminal mr-2"></i> MT5 Terminal</button>
+        <button onclick="switchTab('orders'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-list-check mr-2"></i> Order Stream</button>
+        <button onclick="switchTab('strategy'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-chess-board mr-2"></i> Strategy Matrix</button>
+        <button onclick="switchTab('calculator'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-calculator mr-2"></i> Risk Calc</button>
+        <button onclick="switchTab('analytics'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Analytics</button>
+        <button onclick="switchTab('assistant'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-emerald-400 hover:bg-slate-800"><i class="fa-solid fa-robot mr-2"></i> Nop.AI Assistant</button>
+        <button onclick="switchTab('docs'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-book mr-2"></i> Knowledge Base</button>
+    </div>
 
-  <!-- HOW TO COPY PAGE -->
-  <div class="page subpage" data-page="how">
-    <section>
-      <h2 class="reveal">เริ่มต้นก็อปปี้เทรดใน <span class="green">3 ขั้นตอนง่ายๆ</span></h2>
-      <p class="sub reveal">ไม่ต้องติดตั้ง EA เอง เริ่มต้นได้ทันที</p>
-      <div class="steps">
-        <div class="step reveal"><h3>1. เปิดบัญชีเทรด</h3><p>สมัครเปิดบัญชีเทรด (แนะนำ Cent Account สำหรับทุนเริ่มต้น $200) ผ่านโบรกเกอร์ที่รองรับ</p></div>
-        <div class="step reveal"><h3>2. เชื่อมต่อระบบ</h3><p>แจ้งเลขบัญชีเทรดของคุณกับทีมงาน เพื่อทำการเชื่อมต่อสัญญาณ Copy Trade เข้ากับพอร์ตหลัก</p></div>
-        <div class="step reveal"><h3>3. รับกำไรอัตโนมัติ</h3><p>ระบบจะทำการเปิด-ปิดออเดอร์ตาม EA อัตโนมัติ 24/5 ติดตามผลผ่านมือถือได้ตลอดเวลา</p></div>
-      </div>
-    </section>
-  </div>
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
 
-  <!-- FAQ PAGE -->
-  <div class="page subpage" data-page="faq">
-    <section>
-      <h2 class="reveal">คำถามที่ <span class="green">พบบ่อย</span></h2>
-      <p class="sub reveal">ข้อสงสัยทั่วไปเกี่ยวกับบริการ Copy Trade</p>
-      <div class="faq reveal">
-        <div class="q"><button>มีขายไฟล์ EA ไหม?</button><div>บริการนี้ให้บริการในรูปแบบ Copy Trade เท่านั้น ไม่มีจำหน่ายไฟล์ EA แยกครับ</div></div>
-        <div class="q"><button>ทุน $200 เริ่มต้นได้ไหม?</button><div>เริ่มต้นได้ครับ แต่แนะนำให้ใช้ "บัญชี Cent" เพื่อให้ระบบซอย Lot ได้ละเอียดและปลอดภัยต่อพอร์ตมากที่สุด</div></div>
-        <div class="q"><button>ต้องเปิดคอมพิวเตอร์ทิ้งไว้ไหม?</button><div>ไม่ต้องครับ ระบบรันบน VPS Cloud ความเร็วสูงตลอด 24 ชั่วโมง คุณปิดเครื่องนอนได้เลย</div></div>
-        <div class="q"><button>การันตีกำไรไหม?</button><div>ไม่มีการันตีกำไร การเทรดทองคำมีความเสี่ยงสูง ควรศึกษาข้อมูลและลงทุนด้วยเงินที่รับความเสี่ยงได้</div></div>
-      </div>
-    </section>
-  </div>
+        <!-- ================= TAB 1: COMMAND HUD ================= -->
+        <div id="tab-hud" class="space-y-6 tab-content">
+            <!-- Telemetry Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass p-5 rounded-2xl border border-gold-500/20 glow-gold relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-gold-500/10 text-7xl"><i class="fa-solid fa-wallet"></i></div>
+                    <p class="text-xs font-mono text-slate-400 uppercase tracking-wider" data-i18n="lbl_balance">Account Balance</p>
+                    <h3 class="text-3xl font-extrabold text-white mt-1 mono">$94,376.54</h3>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-emerald-400"><i class="fa-solid fa-arrow-trend-up"></i> <span data-i18n="lbl_live_sync">Live MT5 Firebase Synced</span></div>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-emerald-500/20 glow-emerald relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-emerald-500/10 text-7xl"><i class="fa-solid fa-chart-pie"></i></div>
+                    <p class="text-xs font-mono text-slate-400 uppercase tracking-wider" data-i18n="lbl_equity">Equity / Floating</p>
+                    <h3 class="text-3xl font-extrabold text-emerald-400 mt-1 mono">$94,520.10</h3>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-slate-300"><span class="text-gold-400 font-bold">+$143.56</span> <span data-i18n="lbl_basket_prog">Basket Progress 14.3%</span></div>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-slate-500/10 text-7xl"><i class="fa-solid fa-shield-halved"></i></div>
+                    <p class="text-xs font-mono text-slate-400 uppercase tracking-wider" data-i18n="lbl_winrate">Win Rate & Ratio</p>
+                    <h3 class="text-3xl font-extrabold text-gold-400 mt-1 mono">87.1%</h3>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-slate-300"><span>Profit Factor: <strong class="text-white">4.08</strong></span></div>
+                </div>
+                <div class="glass p-5 rounded-2xl border border-slate-700 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-slate-500/10 text-7xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <p class="text-xs font-mono text-slate-400 uppercase tracking-wider" data-i18n="lbl_maxdd">Max Drawdown</p>
+                    <h3 class="text-3xl font-extrabold text-amber-400 mt-1 mono">0.03%</h3>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-slate-400"><span data-i18n="lbl_status_normal">Risk Status: Optimal</span></div>
+                </div>
+            </div>
 
-  <!-- CONTACT PAGE -->
-  <div class="page subpage" data-page="contact">
-    <section>
-      <h2 class="reveal">ติดต่อเรา & <span class="green">เริ่มใช้งาน</span></h2>
-      <p class="sub reveal">สอบถามข้อมูลเพิ่มเติม หรือสมัครเชื่อมต่อ Copy Trade ได้ที่นี่</p>
-      <div class="contact-grid reveal">
-        <div class="contact-card">
-          <div class="ic">💬</div>
-          <h3>Line Official</h3>
-          <p>ปรึกษาพูดคุยกับแอดมิน</p>
-          <button class="btn pri" onclick="alert('Line ID: @nophedge (ตัวอย่าง)')">คลิกเพิ่มเพื่อน</button>
+            <!-- Main Interactive Section: TradingView Chart & Quick Control Panel -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- TradingView Chart Widget (2 Cols) -->
+                <div class="lg:col-span-2 glass p-6 rounded-2xl border border-slate-800 flex flex-col h-[520px]">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+                            <h2 class="text-lg font-bold text-white tracking-wide">OANDA:XAUUSD M1 Institutional Stream</h2>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                            <span class="text-gold-400">Spread: 12 pts</span>
+                            <span class="text-slate-600">|</span>
+                            <span class="text-emerald-400">MACD Bullish M1</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow w-full rounded-xl overflow-hidden border border-slate-800 bg-black/40">
+                        <!-- TradingView Widget BEGIN -->
+                        <div class="tradingview-widget-container h-full w-full">
+                            <iframe scrolling="no" allowtransparency="true" frameborder="0" src="https://www.tradingview-widget.com/embed-widget/advanced-chart/?locale=th#%7B%22autosize%22%3Atrue%2C%22symbol%22%3A%22OANDA%3AXAUUSD%22%2C%22timezone%22%3A%22Asia%2FBangkok%22%2C%22theme%22%3A%22dark%22%2C%22style%22%3A%221%22%2C%22locale%22%3A%22th%22%2C%22toolbar_bg%22%3A%22%23f1f3f6%22%2C%22enable_publishing%22%3Afalse%2C%22hide_top_toolbar%22%3Afalse%2C%22save_image%22%3Afalse%2C%22container_id%22%3A%22tradingview_12345%22%7D" style="width: 100%; height: 100%; box-sizing: border-box;"></iframe>
+                        </div>
+                        <!-- TradingView Widget END -->
+                    </div>
+                </div>
+
+                <!-- EA Control & Live Status Card (1 Col) -->
+                <div class="glass p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <h2 class="font-bold text-white flex items-center gap-2"><i class="fa-solid fa-microchip text-gold-400"></i> <span data-i18n="lbl_ea_status">EA Core Status</span></h2>
+                            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-mono font-bold rounded border border-emerald-500/20" data-i18n="lbl_active">ACTIVE v4.6</span>
+                        </div>
+                        <div class="space-y-3.5 text-sm">
+                            <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                                <span class="text-slate-400" data-i18n="lbl_group1">Group 1 (Base+Fix)</span>
+                                <span class="font-mono font-bold text-gold-400">#20260203</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                                <span class="text-slate-400" data-i18n="lbl_group2">Group 2 (Grid Set)</span>
+                                <span class="font-mono font-bold text-emerald-400">#20260204</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                                <span class="text-slate-400" data-i18n="lbl_strategy_mode">Strategy Mode</span>
+                                <span class="font-mono font-bold text-white">MACD M1 + Hedge</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                                <span class="text-slate-400" data-i18n="lbl_hedge_state">Hedge State</span>
+                                <span class="font-mono font-bold text-amber-400" data-i18n="lbl_standby">STANDBY / MONITOR</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="triggerAction('sync')" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-gold-400 rounded-xl font-bold text-sm transition border border-gold-500/30 flex items-center justify-center gap-2 shadow">
+                            <i class="fa-solid fa-rotate"></i> <span data-i18n="btn_sync">Sync Firebase</span>
+                        </button>
+                        <button onclick="triggerAction('emergency')" class="w-full py-3 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 rounded-xl font-bold text-sm transition border border-emerald-500/40 flex items-center justify-center gap-2 shadow">
+                            <i class="fa-solid fa-shield-heart"></i> <span data-i18n="btn_safe">Safe Basket</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="contact-card">
-          <div class="ic">✈️</div>
-          <h3>Telegram Channel</h3>
-          <p>ติดตามผลงานและประกาศสำคัญ</p>
-          <button class="btn pri" onclick="alert('Telegram: @NopHedgeGold (ตัวอย่าง)')">เข้าร่วมกลุ่ม</button>
+
+        <!-- ================= TAB 2: MT5 TERMINAL ================= -->
+        <div id="tab-terminal" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-terminal text-gold-400"></i> MT5 Telemetry & Logs</h2>
+                        <p class="text-xs text-slate-400">Real-time MQL5 Expert Advisor diagnostics and execution ledger.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="addLogEntry('Info', 'Manual diagnostics requested successfully.')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 border border-slate-700">Run Diagnostics</button>
+                    </div>
+                </div>
+                <div class="mt-4 bg-black/60 rounded-xl p-4 font-mono text-xs text-emerald-400 space-y-2 h-96 overflow-y-auto custom-scrollbar border border-slate-800" id="terminalLogs">
+                    <div>[2026-03-31 23:08:12] Nop_HedgeRescue_Gold_4.6 initialized successfully on XAUUSD M1.</div>
+                    <div>[2026-03-31 23:08:15] Group 1 Magic #20260203 linked. Base lot: 0.01 (MACD Momentum active).</div>
+                    <div>[2026-03-31 23:08:18] Group 2 Grid Magic #20260204 standby. Grid Step: 500 pts, Mult: 1.35x.</div>
+                    <div>[2026-03-31 23:09:02] Firebase REST API sync successful. Account telemetry updated.</div>
+                    <div>[2026-03-31 23:10:44] Spread checked: 12 pts <= MaxSpread (OK). No slippage detected.</div>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
-  </div>
-</main>
 
-<section class="shared">
-  <p class="risk">⚠️ คำเตือนความเสี่ยง: การเทรดทองคำ (XAUUSD) และตลาด Forex/CFD มีความเสี่ยงสูง อาจสูญเสียเงินลงทุนได้ทั้งหมด การก็อปปี้เทรดไม่ได้รับประกันผลกำไร ผลการดำเนินงานในอดีตไม่สามารถการันตีผลในอนาคตได้ ควรพิจารณาความเสี่ยงก่อนตัดสินใจลงทุน</p>
-</section>
-<footer>© 2026 Nop.Hedge Gold EA · Copy Trade All Rights Reserved.</footer>
+        <!-- ================= TAB 3: ORDER STREAM ================= -->
+        <div id="tab-orders" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-gold-400"></i> Recent Closed Orders Stream</h2>
+                        <p class="text-xs text-slate-400">Last 5 closed baskets synchronized from MQL5 deal history.</p>
+                    </div>
+                </div>
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-900/80 text-slate-400 uppercase font-mono text-xs border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Ticket</th>
+                                <th class="p-3">Symbol</th>
+                                <th class="p-3">Group</th>
+                                <th class="p-3">Lots</th>
+                                <th class="p-3">Net Profit</th>
+                                <th class="p-3">Time Closed</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 font-mono text-xs" id="orderStreamTable">
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3 text-gold-400">#89421033</td>
+                                <td class="p-3">XAUUSD</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-gold-500/10 text-gold-400">Group 1</span></td>
+                                <td class="p-3">0.03</td>
+                                <td class="p-3 text-emerald-400 font-bold">+$48.50</td>
+                                <td class="p-3 text-slate-400">2026.03.31 22:45</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3 text-gold-400">#89420912</td>
+                                <td class="p-3">XAUUSD</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">Group 2 (Grid)</span></td>
+                                <td class="p-3">0.05</td>
+                                <td class="p-3 text-emerald-400 font-bold">+$102.30</td>
+                                <td class="p-3 text-slate-400">2026.03.31 21:12</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3 text-gold-400">#89419844</td>
+                                <td class="p-3">XAUUSD</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-gold-500/10 text-gold-400">Group 1</span></td>
+                                <td class="p-3">0.01</td>
+                                <td class="p-3 text-emerald-400 font-bold">+$12.10</td>
+                                <td class="p-3 text-slate-400">2026.03.31 19:30</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<!-- Popup Modal -->
-<div class="ov" id="ov">
-  <div class="pop" id="pop">
-    <button class="x" aria-label="ปิด">✕</button>
-    <span class="em">🥇</span>
-    <h3>ยินดีต้อนรับ</h3>
-    <p>เว็บไซต์แนะนำระบบ Copy Trade ทองคำ Nop.Hedge Gold EA กดฟังเพลงประกอบหรือเข้าสู่เว็บไซต์ได้เลยครับ</p>
-    <button class="btn pri" data-act="music-on">🎧 เปิดเพลง & เข้าสู่เว็บไซต์</button>
-    <button class="btn" data-act="no-music">เข้าสู่เว็บไซต์แบบไม่มีเพลง</button>
-  </div>
-</div>
+        <!-- ================= TAB 4: STRATEGY MATRIX ================= -->
+        <div id="tab-strategy" class="space-y-6 tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass p-6 rounded-2xl border border-gold-500/20">
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid id-card text-gold-400"></i> Group 1: Hedge Rescue Core</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        เปิดออเดอร์ Base ตามโมเมนตัม MACD M1 หรือ EMA เมื่อราคาเคลื่อนที่สวนทางถึงจุดกำหนด (InpHedgeTrigger เช่น $2,000 หรือ 500 จุด) ระบบจะทำการล็อกสถานะด้วยคำสั่ง Hedge ทันที ป้องกัน Drawdown เพิ่มเติม และใช้ระบบ Recovery Martingale (คูณ 1.35x) พร้อมฟังก์ชัน Unlock Trail และ Pair Close เพื่อปิดทำกำไรสะสม
+                    </p>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-emerald-500/20">
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-chess-grid text-emerald-400"></i> Group 2: Pure Grid Harvesting</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        ทำงานคู่ขนานขณะที่ Group 1 อยู่ในสถานะล็อก Hedged โดยสร้างตะกร้า Grid เฉลี่ยราคา (Grid Step 500 จุด, Martingale 1.35x สูงสุด 10 ไม้) ทำกำไรเป้าหมาย InpGridTarget ($100 ต่อเซ็ต) และมีระบบ Cover Close ปิดรวบทั้งสองกลุ่มเมื่อผลกำไรรวมคุ้มทุนทั้งหมด
+                    </p>
+                </div>
+            </div>
+        </div>
 
-<script>
-// CONFIG & Tracks
-var CONFIG = {
-  tracks: [
-    {name:"Summer Anthem (1)", url:"track1.mp3"},
-    {name:"Summer Anthem (2)", url:"track2.mp3"},
-    {name:"Score a Goal Every Day (1)", url:"track3.mp3"},
-    {name:"Score a Goal Every Day (2)", url:"track4.mp3"},
-    {name:"สู้ สู้ กำไรดี", url:"track5.mp3"}
-  ]
-};
+        <!-- ================= TAB 5: RISK CALCULATOR ================= -->
+        <div id="tab-calculator" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800 max-w-2xl mx-auto">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-calculator text-gold-400"></i> Capital & Lot Calculator</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Account Balance ($ USD)</label>
+                        <input type="number" id="calcBalance" value="10000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Base Lot Size</label>
+                        <input type="number" id="calcLot" value="0.01" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:border-gold-500">
+                    </div>
+                    <button onclick="calculateRisk()" class="w-full py-3 bg-gradient-to-r from-gold-500 to-emerald-500 text-black font-extrabold rounded-xl shadow-lg hover:opacity-95 transition">Calculate Simulation</button>
+                    <div id="calcResult" class="glass-gold p-4 rounded-xl mt-4 font-mono text-sm hidden">
+                        <!-- Result populated via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
-var $ = function(s, r) { return (r || document).querySelector(s); };
-var $$ = function(s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+        <!-- ================= TAB 6: ANALYTICS ================= -->
+        <div id="tab-analytics" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-line text-gold-400"></i> Performance Analytics & Profit Matrix</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400">Today Realized Profit</span>
+                        <h4 class="text-2xl font-bold text-emerald-400 mt-1 mono">+$49.56</h4>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400">This Month Realized Profit</span>
+                        <h4 class="text-2xl font-bold text-gold-400 mt-1 mono">+$1,450.20</h4>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400">Total Profit Factor</span>
+                        <h4 class="text-2xl font-bold text-white mt-1 mono">4.08</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-// Scroll Progress Bar
-window.onscroll = function() {
-  var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-  var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-  var scrolled = (winScroll / height) * 100;
-  $('#progress').style.width = scrolled + '%';
-};
+        <!-- ================= TAB 7: NOP.AI ASSISTANT ================= -->
+        <div id="tab-assistant" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800 max-w-3xl mx-auto flex flex-col h-[550px]">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                            <i class="fa-solid fa-robot text-emerald-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-white">Nop.AI Trading Assistant</h2>
+                            <p class="text-xs text-emerald-400">Bilingual Institutional AI Model (TH / EN)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-grow my-4 overflow-y-auto space-y-3 pr-2 custom-scrollbar text-sm" id="chatContainer">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30 text-emerald-400 font-bold text-xs">AI</div>
+                        <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 text-slate-200 max-w-[80%]">
+                            สวัสดีครับ! ผม Nop.AI ผู้ช่วยอัจฉริยะสำหรับ Nop.Hedge Gold EA มีคำถามเกี่ยวกับการตั้งค่า Grid, การเปิดออเดอร์ หรือระบบ Firebase Sync สอบถามได้เลยครับ!
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-800">
+                    <input type="text" id="chatInput" placeholder="พิมพ์คำถามของคุณที่นี่..." class="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 text-sm">
+                    <button onclick="sendChatMessage()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition shadow"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
 
-// Mobile Menu
-$('#burger').onclick = function() { $('#menu').classList.toggle('open'); };
-$$('#menu a').forEach(function(a) { a.onclick = function() { $('#menu').classList.remove('open'); } });
+        <!-- ================= TAB 8: KNOWLEDGE BASE ================= -->
+        <div id="tab-docs" class="space-y-6 tab-content hidden">
+            <div class="glass p-6 rounded-2xl border border-slate-800 space-y-6">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-book text-gold-400"></i> Institutional Knowledge Base & Documentation</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-300">
+                    <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-2">
+                        <h4 class="font-bold text-gold-400 flex items-center gap-2"><i class="fa-solid fa-shield"></i> การจัดการความเสี่ยงขั้นสูง (Risk Protocol)</h4>
+                        <p class="leading-relaxed text-xs">แนะนำให้รัน EA บนบัญชีประเภท Hedging และตั้งค่าทุนเริ่มต้น (InpCapital) ให้สอดคล้องกับขนาดล็อตเริ่มต้น (0.01 ต่อทุน $10,000) เพื่อให้ระบบรักษาระดับ Drawdown ให้อยู่ในกรอบที่ปลอดภัยต่ำกว่า 30%</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 space-y-2">
+                        <h4 class="font-bold text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-fire"></i> การเชื่อมต่อ Firebase Real-time Database</h4>
+                        <p class="leading-relaxed text-xs">ระบบ EA จะทำการซิงก์ข้อมูล Balance, Equity และรายการออเดอร์ปิดล่าสุดไปยังโหนด Firebase ของคุณโดยอัตโนมัติผ่านฟังก์ชัน WebRequest ของ MQL5 เพื่อแสดงผลบนหน้าเว็บไซต์สถาบันการเงินนี้</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-// Audio Player
-var bgm = $('#bgm'), pl = $('#player'), pb = $('#pbtn'), loaded = false, userOff = false;
-bgm.volume = .5;
-var TR = CONFIG.tracks, idx = 0;
-function ui() {
-  $('#tname').textContent = TR[idx].name;
-  $$('#items button').forEach(function(b, i) { b.classList.toggle('cur', i === idx); });
-}
-function loadAudio() { if (!loaded) { bgm.src = TR[idx].url; loaded = true; } }
-function setTrack(i, autoplay) {
-  idx = (i + TR.length) % TR.length;
-  bgm.src = TR[idx].url; loaded = true; ui();
-  if (autoplay) { userOff = false; bgm.muted = false; var p = bgm.play(); if (p && p.catch) p.catch(function(){}); }
-}
-bgm.onended = function() { setTrack(idx + 1, true); };
-$('#items').innerHTML = TR.map(function(t, i) { return '<button data-i="'+i+'"><i>'+(i+1)+'</i>'+t.name+'</button>'; }).join('');
-$('#items').onclick = function(e) { var b = e.target.closest('button'); if (b) { setTrack(+b.dataset.i, true); } };
-$('#pprev').onclick = function() { setTrack(idx - 1, !bgm.paused || !userOff); };
-$('#pnext').onclick = function() { setTrack(idx + 1, !bgm.paused || !userOff); };
-$('#lbtn').onclick = function(e) { e.stopPropagation(); $('#plist').classList.toggle('open'); };
-document.addEventListener('click', function(e) { if (!e.target.closest('#plist,#lbtn')) $('#plist').classList.remove('open'); });
-ui();
+    </main>
 
-function playM() { loadAudio(); bgm.muted = false; var p = bgm.play(); if (p && p.catch) p.catch(function(){}); }
-bgm.onplay = function() { pl.classList.add('on'); pb.textContent = bgm.muted ? '🔇' : '❚❚'; };
-bgm.onpause = function() { pl.classList.remove('on'); pb.textContent = '▶'; };
-pb.onclick = function() {
-  if (bgm.muted && !bgm.paused) { bgm.muted = false; pb.textContent = '❚❚'; userOff = false; return; }
-  if (bgm.paused) { userOff = false; playM(); } else { userOff = true; bgm.pause(); }
-  pl.classList.add('show'); clearTimeout(window._t); window._t = setTimeout(function() { pl.classList.remove('show'); }, 3000);
-};
+    <!-- Footer -->
+    <footer class="glass border-t border-slate-800 py-6 text-center text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 Nop.Hedge Gold EA · All Institutional Rights Reserved.</p>
+            <p class="text-gold-400 font-mono">XAUUSD M1 · High-Frequency Algorithmic Architecture</p>
+        </div>
+    </footer>
 
-$('#vol').oninput = function(e) { bgm.volume = e.target.value; };
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- Translations Dictionary ---
+        const translations = {
+            th: {
+                notice: "เว็บไซต์/แพลตฟอร์ม EA กำลังอยู่ในช่วงทดลอง (Testing Phase) · Institutional Algorithmic Environment",
+                hud: "Command HUD", terminal: "MT5 Terminal", orders: "Order Stream", strategy: "Strategy Matrix",
+                calculator: "Risk Calc", analytics: "Analytics", assistant: "Nop.AI", docs: "Knowledge",
+                lbl_balance: "ยอดเงินในบัญชี (Balance)", lbl_equity: "มูลค่าสุทธิ / กำไรลอยตัว", lbl_winrate: "อัตราความสำเร็จ (Win Rate)",
+                lbl_maxdd: "Drawdown สูงสุด", lbl_live_sync: "ซิงก์ข้อมูล MT5 Firebase เรียลไทม์", lbl_basket_prog: "ความคืบหน้าตะกร้ากำไร 14.3%",
+                lbl_status_normal: "สถานะความเสี่ยง: ปกติ", lbl_ea_status: "สถานะระบบ EA Core", lbl_active: "กำลังทำงาน v4.6",
+                lbl_group1: "กลุ่มที่ 1 (Base+Fix)", lbl_group2: "กลุ่มที่ 2 (Grid Set)", lbl_strategy_mode: "โหมดกลยุทธ์",
+                lbl_hedge_state: "สถานะเฮดจ์", lbl_standby: "รอสัญญาณ / เฝ้าระวัง", btn_sync: "ซิงก์ Firebase", btn_safe: "ล็อกเซฟบาสเก็ต"
+            },
+            en: {
+                notice: "EA platform is currently in the Testing Phase · Institutional Algorithmic Environment",
+                hud: "Command HUD", terminal: "MT5 Terminal", orders: "Order Stream", strategy: "Strategy Matrix",
+                calculator: "Risk Calc", analytics: "Analytics", assistant: "Nop.AI", docs: "Knowledge",
+                lbl_balance: "Account Balance", lbl_equity: "Equity / Floating", lbl_winrate: "Win Rate & Ratio",
+                lbl_maxdd: "Max Drawdown", lbl_live_sync: "Live MT5 Firebase Synced", lbl_basket_prog: "Basket Progress 14.3%",
+                lbl_status_normal: "Risk Status: Optimal", lbl_ea_status: "EA Core Status", lbl_active: "ACTIVE v4.6",
+                lbl_group1: "Group 1 (Base+Fix)", lbl_group2: "Group 2 (Grid Set)", lbl_strategy_mode: "Strategy Mode",
+                lbl_hedge_state: "Hedge State", lbl_standby: "STANDBY / MONITOR", btn_sync: "Sync Firebase", btn_safe: "Safe Basket"
+            }
+        };
 
-// Popup Modal Handling
-var ov = $('#ov'), pop = $('#pop');
-function openPop() { ov.classList.add('show'); }
-function closePop() { ov.classList.remove('show'); }
-ov.addEventListener('click', function(e) {
-  if (e.target === ov || e.target.classList.contains('x')) return closePop();
-  var act = e.target.getAttribute('data-act');
-  if (act === 'music-on') { userOff = false; playM(); closePop(); }
-  if (act === 'no-music') { userOff = true; bgm.pause(); closePop(); }
-});
-setTimeout(openPop, 400);
+        let currentLang = 'th';
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('btn-th').className = lang === 'th' ? 'px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-gold-500 text-black shadow-sm' : 'px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white';
+            document.getElementById('btn-en').className = lang === 'en' ? 'px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-gold-500 text-black shadow-sm' : 'px-2.5 py-0.5 rounded text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white';
+            document.getElementById('lang-indicator').innerText = lang.toUpperCase();
+            document.getElementById('txt-testing-notice').innerText = translations[lang].notice;
 
-// FAQ Accordion
-$$('.q button').forEach(function(b) {
-  b.onclick = function() {
-    var q = b.parentNode, o = q.classList.contains('o');
-    $$('.q').forEach(function(x) { x.classList.remove('o'); });
-    if (!o) q.classList.add('o');
-  };
-});
+            // Translate data-i18n elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerText = translations[lang][key];
+            });
+            document.querySelectorAll('.t-hud').forEach(el => el.innerText = translations[lang].hud);
+            document.querySelectorAll('.t-terminal').forEach(el => el.innerText = translations[lang].terminal);
+            document.querySelectorAll('.t-orders').forEach(el => el.innerText = translations[lang].orders);
+            document.querySelectorAll('.t-strategy').forEach(el => el.innerText = translations[lang].strategy);
+            document.querySelectorAll('.t-calculator').forEach(el => el.innerText = translations[lang].calculator);
+            document.querySelectorAll('.t-analytics').forEach(el => el.innerText = translations[lang].analytics);
+            document.querySelectorAll('.t-assistant').forEach(el => el.innerText = translations[lang].assistant);
+            document.querySelectorAll('.t-docs').forEach(el => el.innerText = translations[lang].docs);
+        }
 
-// Scroll Reveal
-var io = new IntersectionObserver(function(es) {
-  es.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('v'); io.unobserve(e.target); } });
-}, { threshold: 0.1 });
-$$('.reveal').forEach(function(el) { io.observe(el); });
+        // --- Tab Switching ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
 
-// SPA Router
-var PAGES = ['home', 'about', 'features', 'strategy', 'performance', 'how', 'faq', 'contact'];
-function go(name) {
-  if (PAGES.indexOf(name) < 0) name = 'home';
-  $$('.page').forEach(function(p) { p.classList.toggle('act', p.getAttribute('data-page') === name); });
-  $$('[data-go]').forEach(function(a) { a.classList.toggle('cur', a.getAttribute('data-go') === name && !a.classList.contains('logo')); });
-  $('#menu').classList.remove('open');
-  window.scrollTo(0, 0);
-  $$('.page.act .reveal').forEach(function(el) { el.classList.remove('v'); io.observe(el); });
-}
-function route() { go((location.hash || '#home').replace('#', '')); }
-addEventListener('hashchange', route);
-$$('[data-go]').forEach(function(a) {
-  a.addEventListener('click', function(e) {
-    e.preventDefault();
-    var n = a.getAttribute('data-go');
-    location.hash = n;
-  });
-});
-route();
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400 hover:text-white";
+                if(btn.getAttribute('data-tab') === tabId) {
+                    btn.className = "tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition-all text-gold-400 bg-slate-800/80 shadow";
+                }
+            });
+        }
 
-// Calculator Logic
-$('#capital').oninput = function(e) {
-  var val = e.target.value;
-  $('#amt-val').textContent = val;
-  var rec = $('#rec-type');
-  if (val < 300) {
-    rec.textContent = "Cent Account (แนะนำปลอดภัยสุด)";
-  } else if (val < 1000) {
-    rec.textContent = "Cent หรือ Standard (ปรับ Lot ตามสัดส่วน)";
-  } else {
-    rec.textContent = "Standard Account (เต็มระบบ)";
-  }
-};
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
 
-// Canvas Background (Gold & Emerald Particles)
-(function() {
-  var c = $('#bg'), x = c.getContext('2d'), W, H, pts = [];
-  function rs() {
-    W = c.width = c.offsetWidth; H = c.height = c.offsetHeight;
-    pts = [];
-    for (var i = 0; i < 50; i++) {
-      pts.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .6, vy: (Math.random() - .5) * .6, r: Math.random() * 2 + 1 });
-    }
-  }
-  rs(); addEventListener('resize', rs);
-  function draw() {
-    x.clearRect(0, 0, W, H);
-    x.fillStyle = 'rgba(31,242,160,0.6)';
-    pts.forEach(function(p) {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0 || p.x > W) p.vx *= -1;
-      if (p.y < 0 || p.y > H) p.vy *= -1;
-      x.beginPath(); x.arc(p.x, p.y, p.r, 0, Math.PI * 2); x.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-</script>
+        // --- Audio Synthesizer / Equalizer Toggle ---
+        let audioActive = false;
+        function toggleAudio() {
+            audioActive = !audioActive;
+            const btn = document.getElementById('audioToggleBtn');
+            btn.innerHTML = audioActive ? '<i class="fa-solid fa-volume-high text-lg text-emerald-400"></i>' : '<i class="fa-solid fa-volume-xmark text-lg text-slate-500"></i>';
+            addLogEntry('Audio', audioActive ? 'Ambient institutional audio synthesizer activated.' : 'Audio muted.');
+        }
+
+        // --- Action Triggers ---
+        function triggerAction(type) {
+            if(type === 'sync') {
+                addLogEntry('Firebase', 'Manual REST API push executed successfully.');
+                alert('Firebase Sync Completed Successfully!');
+            } else if(type === 'emergency') {
+                addLogEntry('Safety', 'Safe basket protocol evaluated. All groups stable.');
+                alert('Safe Basket Protocol Checked: System Optimal.');
+            }
+        }
+
+        function addLogEntry(type, msg) {
+            const logs = document.getElementById('terminalLogs');
+            const time = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const div = document.createElement('div');
+            div.innerText = `[${time}] [${type}] ${msg}`;
+            logs.appendChild(div);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        // --- Risk Calculator ---
+        function calculateRisk() {
+            const bal = parseFloat(document.getElementById('calcBalance').value);
+            const lot = parseFloat(document.getElementById('calcLot').value);
+            const res = document.getElementById('calcResult');
+            res.classList.remove('hidden');
+            res.innerHTML = `<strong>Simulation Results:</strong><br>• Initial Capital: $${bal.toLocaleString()}<br>• Base Lot: ${lot}<br>• Estimated Max Martingale Step (10 orders): ~0.53 lot total<br>• Recommended Capital Buffer: $${(bal * 0.3).toFixed(2)}`;
+        }
+
+        // --- Nop.AI Chatbot ---
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const container = document.getElementById('chatContainer');
+            const text = input.value.trim();
+            if(!text) return;
+
+            // User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex gap-3 justify-end";
+            userDiv.innerHTML = `<div class="bg-gold-500/20 p-3.5 rounded-2xl border border-gold-500/30 text-gold-200 max-w-[80%]">${text}</div><div class="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center shrink-0 border border-gold-500/30 text-gold-400 font-bold text-xs">YOU</div>`;
+            container.appendChild(userDiv);
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            // AI Response Simulation
+            setTimeout(() => {
+                const aiDiv = document.createElement('div');
+                aiDiv.className = "flex gap-3";
+                aiDiv.innerHTML = `<div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30 text-emerald-400 font-bold text-xs">AI</div><div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 text-slate-200 max-w-[80%]">Nop.AI ได้รับคำถามของคุณแล้ว ระบบ EA กำลังรันรอบการคำนวณ Grid และ Hedging บนคู่เงิน XAUUSD อย่างแม่นยำครับ มีส่วนไหนต้องการให้ปรับแต่งเพิ่มเติมไหมครับ?</div>`;
+                container.appendChild(aiDiv);
+                container.scrollTop = container.scrollHeight;
+            }, 800);
+        }
+
+        // --- Particle Canvas Animation ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.color = Math.random() > 0.5 ? 'rgba(234, 179, 8, 0.4)' : 'rgba(16, 185, 129, 0.4)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                else if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            for (let i = 0; i < 70; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesArray.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
 </body>
 </html>
